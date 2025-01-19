@@ -1,4 +1,6 @@
 import { Card } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { Trash2 } from "lucide-react";
 import { formatDistanceToNow } from "date-fns";
 
 interface Expense {
@@ -9,7 +11,13 @@ interface Expense {
   date: Date;
 }
 
-export function ExpenseList({ expenses }: { expenses: Expense[] }) {
+export function ExpenseList({ 
+  expenses,
+  onDeleteExpense
+}: { 
+  expenses: Expense[];
+  onDeleteExpense?: (id: number) => void;
+}) {
   return (
     <div className="space-y-4">
       {expenses.map((expense) => (
@@ -21,10 +29,22 @@ export function ExpenseList({ expenses }: { expenses: Expense[] }) {
                 <p className="text-sm text-gray-500">{expense.description}</p>
               )}
               <p className="text-xs text-gray-400">
-                {formatDistanceToNow(expense.date, { addSuffix: true })}
+                {formatDistanceToNow(new Date(expense.date), { addSuffix: true })}
               </p>
             </div>
-            <p className="font-semibold">${expense.amount.toFixed(2)}</p>
+            <div className="flex items-center gap-2">
+              <p className="font-semibold">€{expense.amount.toFixed(2)}</p>
+              {onDeleteExpense && (
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  onClick={() => onDeleteExpense(expense.id)}
+                  className="h-8 w-8 text-red-500 hover:text-red-700"
+                >
+                  <Trash2 className="h-4 w-4" />
+                </Button>
+              )}
+            </div>
           </div>
         </Card>
       ))}

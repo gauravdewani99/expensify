@@ -4,15 +4,15 @@ import { ExpenseList } from "@/components/ExpenseList";
 import { ExpenseSummary } from "@/components/ExpenseSummary";
 import { Button } from "@/components/ui/button";
 import { Download } from "lucide-react";
+import { useToast } from "@/components/ui/use-toast";
 
 const Index = () => {
   const [expenses, setExpenses] = useState<any[]>(() => {
-    // Load initial expenses from localStorage
     const savedExpenses = localStorage.getItem("expenses");
     return savedExpenses ? JSON.parse(savedExpenses) : [];
   });
+  const { toast } = useToast();
 
-  // Save expenses to localStorage whenever they change
   useEffect(() => {
     localStorage.setItem("expenses", JSON.stringify(expenses));
   }, [expenses]);
@@ -21,9 +21,16 @@ const Index = () => {
     setExpenses((prev) => [expense, ...prev]);
   };
 
+  const handleDeleteExpense = (id: number) => {
+    setExpenses((prev) => prev.filter((expense) => expense.id !== id));
+    toast({
+      title: "Success",
+      description: "Expense deleted successfully",
+    });
+  };
+
   const handleDownload = () => {
-    // Create CSV content
-    const headers = ["Date", "Category", "Amount", "Description"];
+    const headers = ["Date", "Category", "Amount (€)", "Description"];
     const csvContent = [
       headers.join(","),
       ...expenses.map((expense) => [
@@ -34,7 +41,6 @@ const Index = () => {
       ].join(","))
     ].join("\n");
 
-    // Create and trigger download
     const blob = new Blob([csvContent], { type: "text/csv" });
     const url = window.URL.createObjectURL(blob);
     const a = document.createElement("a");
@@ -50,7 +56,7 @@ const Index = () => {
     <div className="min-h-screen bg-gray-50">
       <div className="container py-8">
         <div className="flex justify-between items-center mb-8">
-          <h1 className="text-3xl font-bold">Expense Tracker</h1>
+          <h1 className="text-3xl font-bold">Gaurav's Expense Tracker</h1>
           <Button
             onClick={handleDownload}
             variant="outline"
@@ -63,7 +69,7 @@ const Index = () => {
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
           <div className="md:col-span-2 space-y-6">
             <ExpenseForm onAddExpense={handleAddExpense} />
-            <ExpenseList expenses={expenses} />
+            <ExpenseList expenses={expenses} onDeleteExpense={handleDeleteExpense} />
           </div>
           <div>
             <div className="sticky top-8">
