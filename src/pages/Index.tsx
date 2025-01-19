@@ -1,11 +1,30 @@
-// Update this page (the content is just a fallback if you fail to update the page)
+import { useState } from "react";
+import { ExpenseForm } from "@/components/ExpenseForm";
+import { ExpenseList } from "@/components/ExpenseList";
+import { ExpenseSummary } from "@/components/ExpenseSummary";
 
 const Index = () => {
+  const [expenses, setExpenses] = useState<any[]>([]);
+
+  const handleAddExpense = (expense: any) => {
+    setExpenses((prev) => [expense, ...prev]);
+  };
+
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gray-100">
-      <div className="text-center">
-        <h1 className="text-4xl font-bold mb-4">Welcome to Your Blank App</h1>
-        <p className="text-xl text-gray-600">Start building your amazing project here!</p>
+    <div className="min-h-screen bg-gray-50">
+      <div className="container py-8">
+        <h1 className="text-3xl font-bold text-center mb-8">Expense Tracker</h1>
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+          <div className="md:col-span-2 space-y-6">
+            <ExpenseForm onAddExpense={handleAddExpense} />
+            <ExpenseList expenses={expenses} />
+          </div>
+          <div>
+            <div className="sticky top-8">
+              <ExpenseSummary expenses={expenses} />
+            </div>
+          </div>
+        </div>
       </div>
     </div>
   );
