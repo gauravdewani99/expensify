@@ -1,12 +1,7 @@
-import { useState, useRef } from "react";
+import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { useToast } from "@/components/ui/use-toast";
-import { ChevronLeft, ChevronRight, Calendar as CalendarIcon } from "lucide-react";
-import { Calendar } from "@/components/ui/calendar";
-import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
-import { format } from "date-fns";
-import { cn } from "@/lib/utils";
 
 const categories = [
   "Food & Dining",
@@ -21,17 +16,58 @@ export function ExpenseForm({ onAddExpense }: { onAddExpense: (expense: any) => 
   const [amount, setAmount] = useState("");
   const [category, setCategory] = useState("");
   const [description, setDescription] = useState("");
-  const [date, setDate] = useState<Date>(new Date());
-  const scrollContainerRef = useRef<HTMLDivElement>(null);
+  const [dateInput, setDateInput] = useState("");
   const { toast } = useToast();
+
+  const validateDate = (dateStr: string): Date | null => {
+    // Check format
+    if (!/^\d{2}-\d{2}-\d{4}$/.test(dateStr)) {
+      return null;
+    }
+
+    const [day, month, year] = dateStr.split('-').map(Number);
+
+    // Validate ranges
+    if (
+      day < 1 || day > 31 ||
+      month < 1 || month > 12 ||
+      year < 2000 || year > 2100
+    ) {
+      return null;
+    }
+
+    // Create date object (month - 1 because JS months are 0-based)
+    const date = new Date(year, month - 1, day);
+
+    // Check if it's a valid date (e.g., not 31st of February)
+    if (
+      date.getDate() !== day ||
+      date.getMonth() !== month - 1 ||
+      date.getFullYear() !== year
+    ) {
+      return null;
+    }
+
+    return date;
+  };
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     
-    if (!amount || !category) {
+    if (!amount || !category || !dateInput) {
       toast({
         title: "Error",
         description: "Please fill in all required fields",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    const validatedDate = validateDate(dateInput);
+    if (!validatedDate) {
+      toast({
+        title: "Error",
+        description: "Please enter a valid date in DD-MM-YYYY format",
         variant: "destructive",
       });
       return;
@@ -42,31 +78,19 @@ export function ExpenseForm({ onAddExpense }: { onAddExpense: (expense: any) => 
       amount: parseFloat(amount),
       category,
       description,
-      date,
+      date: validatedDate,
     };
 
     onAddExpense(expense);
     setAmount("");
     setCategory("");
     setDescription("");
-    setDate(new Date());
+    setDateInput("");
 
     toast({
       title: "Success",
       description: "Expense added successfully",
     });
-  };
-
-  const scroll = (direction: 'left' | 'right') => {
-    if (scrollContainerRef.current) {
-      const scrollAmount = 200;
-      const container = scrollContainerRef.current;
-      if (direction === 'left') {
-        container.scrollLeft -= scrollAmount;
-      } else {
-        container.scrollLeft += scrollAmount;
-      }
-    }
   };
 
   return (
@@ -80,42 +104,18 @@ export function ExpenseForm({ onAddExpense }: { onAddExpense: (expense: any) => 
           className="w-full"
         />
       </div>
-      <div className="relative flex items-center">
-        <Button 
-          type="button" 
-          variant="ghost" 
-          size="icon"
-          className="absolute left-0 z-10"
-          onClick={() => scroll('left')}
-        >
-          <ChevronLeft className="h-4 w-4" />
-        </Button>
-        <div 
-          ref={scrollContainerRef}
-          className="flex gap-2 overflow-x-auto scrollbar-hide px-8 py-2 scroll-smooth"
-          style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}
-        >
-          {categories.map((cat) => (
-            <Button
-              key={cat}
-              type="button"
-              variant={category === cat ? "default" : "outline"}
-              onClick={() => setCategory(cat)}
-              className="whitespace-nowrap"
-            >
-              {cat}
-            </Button>
-          ))}
-        </div>
-        <Button 
-          type="button" 
-          variant="ghost" 
-          size="icon"
-          className="absolute right-0 z-10"
-          onClick={() => scroll('right')}
-        >
-          <ChevronRight className="h-4 w-4" />
-        </Button>
+      <div className="flex gap-2 overflow-x-auto scrollbar-hide py-2">
+        {categories.map((cat) => (
+          <Button
+            key={cat}
+            type="button"
+            variant={category === cat ? "default" : "outline"}
+            onClick={() => setCategory(cat)}
+            className="whitespace-nowrap"
+          >
+            {cat}
+          </Button>
+        ))}
       </div>
       <div className="space-y-2">
         <Input
@@ -126,28 +126,15 @@ export function ExpenseForm({ onAddExpense }: { onAddExpense: (expense: any) => 
           className="w-full"
         />
       </div>
-      <Popover>
-        <PopoverTrigger asChild>
-          <Button
-            variant={"outline"}
-            className={cn(
-              "w-full justify-start text-left font-normal",
-              !date && "text-muted-foreground"
-            )}
-          >
-            <CalendarIcon className="mr-2 h-4 w-4" />
-            {date ? format(date, "PPP") : <span>Pick a date</span>}
-          </Button>
-        </PopoverTrigger>
-        <PopoverContent className="w-auto p-0" align="start">
-          <Calendar
-            mode="single"
-            selected={date}
-            onSelect={(newDate) => setDate(newDate || new Date())}
-            initialFocus
-          />
-        </PopoverContent>
-      </Popover>
+      <div className="space-y-2">
+        <Input
+          type="text"
+          placeholder="Date (DD-MM-YYYY)"
+          value={dateInput}
+          onChange={(e) => setDateInput(e.target.value)}
+          className="w-full"
+        />
+      </div>
       <Button type="submit" className="w-full">
         Add Expense
       </Button>
