@@ -2,7 +2,11 @@ import { useState, useRef } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { useToast } from "@/components/ui/use-toast";
-import { ChevronLeft, ChevronRight } from "lucide-react";
+import { ChevronLeft, ChevronRight, Calendar as CalendarIcon } from "lucide-react";
+import { Calendar } from "@/components/ui/calendar";
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+import { format } from "date-fns";
+import { cn } from "@/lib/utils";
 
 const categories = [
   "Food & Dining",
@@ -17,6 +21,7 @@ export function ExpenseForm({ onAddExpense }: { onAddExpense: (expense: any) => 
   const [amount, setAmount] = useState("");
   const [category, setCategory] = useState("");
   const [description, setDescription] = useState("");
+  const [date, setDate] = useState<Date>(new Date());
   const scrollContainerRef = useRef<HTMLDivElement>(null);
   const { toast } = useToast();
 
@@ -37,13 +42,14 @@ export function ExpenseForm({ onAddExpense }: { onAddExpense: (expense: any) => 
       amount: parseFloat(amount),
       category,
       description,
-      date: new Date(),
+      date,
     };
 
     onAddExpense(expense);
     setAmount("");
     setCategory("");
     setDescription("");
+    setDate(new Date());
 
     toast({
       title: "Success",
@@ -120,6 +126,28 @@ export function ExpenseForm({ onAddExpense }: { onAddExpense: (expense: any) => 
           className="w-full"
         />
       </div>
+      <Popover>
+        <PopoverTrigger asChild>
+          <Button
+            variant={"outline"}
+            className={cn(
+              "w-full justify-start text-left font-normal",
+              !date && "text-muted-foreground"
+            )}
+          >
+            <CalendarIcon className="mr-2 h-4 w-4" />
+            {date ? format(date, "PPP") : <span>Pick a date</span>}
+          </Button>
+        </PopoverTrigger>
+        <PopoverContent className="w-auto p-0" align="start">
+          <Calendar
+            mode="single"
+            selected={date}
+            onSelect={(newDate) => setDate(newDate || new Date())}
+            initialFocus
+          />
+        </PopoverContent>
+      </Popover>
       <Button type="submit" className="w-full">
         Add Expense
       </Button>
