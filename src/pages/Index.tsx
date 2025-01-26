@@ -11,43 +11,98 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
+import { supabase } from "@/integrations/supabase/client";
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 
 const Index = () => {
-  const [expenses, setExpenses] = useState<any[]>(() => {
-    const savedExpenses = localStorage.getItem("expenses");
-    return savedExpenses ? JSON.parse(savedExpenses) : [];
-  });
   const [showCsvPreview, setShowCsvPreview] = useState(false);
   const { toast } = useToast();
+  const queryClient = useQueryClient();
 
-  useEffect(() => {
-    localStorage.setItem("expenses", JSON.stringify(expenses));
-  }, [expenses]);
+  // Fetch expenses
+  const { data: expenses = [] } = useQuery({
+    queryKey: ['expenses'],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from('expenses')
+        .select('*')
+        .order('created_at', { ascending: false });
+      
+      if (error) throw error;
+      return data.map(expense => ({
+        ...expense,
+        date: new Date(expense.date),
+      }));
+    },
+  });
+
+  // Add expense mutation
+  const addExpenseMutation = useMutation({
+    mutationFn: async (expense: any) => {
+      const { data, error } = await supabase
+        .from('expenses')
+        .insert([{
+          amount: expense.amount,
+          category: expense.category,
+          description: expense.description,
+          date: expense.date.toISOString(),
+        }])
+        .select()
+        .single();
+      
+      if (error) throw error;
+      return data;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['expenses'] });
+      toast({
+        title: "Success",
+        description: "Expense added successfully",
+      });
+    },
+    onError: (error) => {
+      toast({
+        title: "Error",
+        description: "Failed to add expense",
+        variant: "destructive",
+      });
+      console.error('Error adding expense:', error);
+    },
+  });
+
+  // Delete expense mutation
+  const deleteExpenseMutation = useMutation({
+    mutationFn: async (id: number) => {
+      const { error } = await supabase
+        .from('expenses')
+        .delete()
+        .eq('id', id);
+      
+      if (error) throw error;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['expenses'] });
+      toast({
+        title: "Success",
+        description: "Expense deleted successfully",
+      });
+    },
+    onError: (error) => {
+      toast({
+        title: "Error",
+        description: "Failed to delete expense",
+        variant: "destructive",
+      });
+      console.error('Error deleting expense:', error);
+    },
+  });
 
   const handleAddExpense = (expense: any) => {
-    setExpenses((prev) => [expense, ...prev]);
+    addExpenseMutation.mutate(expense);
   };
 
   const handleDeleteExpense = (id: number) => {
-    setExpenses((prev) => prev.filter((expense) => expense.id !== id));
-    toast({
-      title: "Success",
-      description: "Expense deleted successfully",
-    });
-  };
-
-  const handleDeleteLastExpense = () => {
-    if (expenses.length > 0) {
-      setExpenses((prev) => prev.slice(1));
-      toast({
-        title: "Success",
-        description: "Last expense deleted successfully",
-      });
-    }
-  };
-
-  const getLastThreeExpenses = () => {
-    return expenses.slice(0, 3);
+    deleteExpenseMutation.mutate(id);
   };
 
   const generateCsvContent = () => {
@@ -108,22 +163,18 @@ const Index = () => {
             <div className="bg-white p-4 rounded-lg shadow-sm">
               <div className="flex justify-between items-center mb-4">
                 <h2 className="text-lg font-semibold">Last 3 Expenses</h2>
-                <Button
-                  onClick={handleDeleteLastExpense}
-                  variant="destructive"
-                  size="sm"
-                >
-                  Delete Last Expense
-                </Button>
               </div>
               <ExpenseList
-                expenses={getLastThreeExpenses()}
+                expenses={expenses.slice(0, 3)}
                 onDeleteExpense={handleDeleteExpense}
               />
             </div>
             <div className="bg-white p-4 rounded-lg shadow-sm">
               <h2 className="text-lg font-semibold mb-4">All Expenses</h2>
-              <ExpenseList expenses={expenses} onDeleteExpense={handleDeleteExpense} />
+              <ExpenseList 
+                expenses={expenses} 
+                onDeleteExpense={handleDeleteExpense} 
+              />
             </div>
           </div>
           <div>
