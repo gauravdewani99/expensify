@@ -161,7 +161,6 @@ const Index = () => {
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
           <div className="md:col-span-2 space-y-6">
             <ExpenseForm onAddExpense={handleAddExpense} />
-            <ExpenseChat />
             <div className="bg-white p-4 rounded-lg shadow-sm">
               <div className="flex justify-between items-center mb-4">
                 <h2 className="text-lg font-semibold">Last 3 Expenses</h2>
@@ -180,8 +179,9 @@ const Index = () => {
             </div>
           </div>
           <div>
-            <div className="sticky top-8">
+            <div className="sticky top-8 space-y-6">
               <ExpenseSummary expenses={expenses} />
+              <ExpenseChat />
             </div>
           </div>
         </div>
