@@ -6,7 +6,14 @@ interface Expense {
   date: Date;
 }
 
-const COLORS = ['#0088FE', '#00C49F', '#FFBB28', '#FF8042', '#8884d8', '#82ca9d'];
+const COLORS = [
+  '#9b87f5', // Primary Purple
+  '#7E69AB', // Secondary Purple
+  '#6E59A5', // Tertiary Purple
+  '#D6BCFA', // Light Purple
+  '#8B5CF6', // Vivid Purple
+  '#E5DEFF'  // Soft Purple
+];
 
 export function ExpenseCharts({ expenses }: { expenses: Expense[] }) {
   // Prepare data for category distribution
@@ -20,22 +27,10 @@ export function ExpenseCharts({ expenses }: { expenses: Expense[] }) {
     return acc;
   }, []);
 
-  // Prepare data for monthly distribution
-  const monthlyData = expenses.reduce((acc: any[], expense) => {
-    const month = new Date(expense.date).toLocaleString('default', { month: 'short' });
-    const existingMonth = acc.find(item => item.name === month);
-    if (existingMonth) {
-      existingMonth.value += expense.amount;
-    } else {
-      acc.push({ name: month, value: expense.amount });
-    }
-    return acc;
-  }, []);
-
   return (
-    <div className="grid grid-cols-1 md:grid-cols-2 gap-6 bg-white p-4 rounded-lg shadow-sm">
-      <div className="h-[300px]">
-        <h3 className="text-lg font-semibold mb-4">Expenses by Category</h3>
+    <div className="bg-white p-6 rounded-lg shadow-sm">
+      <div className="h-[400px]">
+        <h3 className="text-xl font-semibold mb-6 text-gray-800">Expenses by Category</h3>
         <ResponsiveContainer width="100%" height="100%">
           <PieChart>
             <Pie
@@ -44,39 +39,38 @@ export function ExpenseCharts({ expenses }: { expenses: Expense[] }) {
               cy="50%"
               labelLine={false}
               label={({ name, percent }) => `${name} (${(percent * 100).toFixed(0)}%)`}
-              outerRadius={80}
+              outerRadius={140}
               fill="#8884d8"
               dataKey="value"
             >
               {categoryData.map((entry, index) => (
-                <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
+                <Cell 
+                  key={`cell-${index}`} 
+                  fill={COLORS[index % COLORS.length]}
+                  stroke="white"
+                  strokeWidth={2}
+                />
               ))}
             </Pie>
-            <Tooltip formatter={(value: number) => `€${value.toFixed(2)}`} />
-            <Legend />
-          </PieChart>
-        </ResponsiveContainer>
-      </div>
-      <div className="h-[300px]">
-        <h3 className="text-lg font-semibold mb-4">Monthly Distribution</h3>
-        <ResponsiveContainer width="100%" height="100%">
-          <PieChart>
-            <Pie
-              data={monthlyData}
-              cx="50%"
-              cy="50%"
-              labelLine={false}
-              label={({ name, percent }) => `${name} (${(percent * 100).toFixed(0)}%)`}
-              outerRadius={80}
-              fill="#8884d8"
-              dataKey="value"
-            >
-              {monthlyData.map((entry, index) => (
-                <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
-              ))}
-            </Pie>
-            <Tooltip formatter={(value: number) => `€${value.toFixed(2)}`} />
-            <Legend />
+            <Tooltip 
+              formatter={(value: number) => `€${value.toFixed(2)}`}
+              contentStyle={{
+                backgroundColor: 'white',
+                border: '1px solid #e2e8f0',
+                borderRadius: '8px',
+                boxShadow: '0 2px 4px rgba(0,0,0,0.1)'
+              }}
+            />
+            <Legend 
+              layout="horizontal" 
+              verticalAlign="bottom" 
+              align="center"
+              wrapperStyle={{
+                paddingTop: '20px',
+                fontFamily: 'system-ui',
+                fontSize: '14px'
+              }}
+            />
           </PieChart>
         </ResponsiveContainer>
       </div>
