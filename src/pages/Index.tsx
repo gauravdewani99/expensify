@@ -3,7 +3,6 @@ import { ExpenseForm } from "@/components/ExpenseForm";
 import { ExpenseList } from "@/components/ExpenseList";
 import { ExpenseSummary } from "@/components/ExpenseSummary";
 import { ExpenseChat } from "@/components/ExpenseChat";
-import { ExpenseCharts } from "@/components/ExpenseCharts";
 import { Button } from "@/components/ui/button";
 import { Download, Eye } from "lucide-react";
 import { useToast } from "@/components/ui/use-toast";
@@ -162,7 +161,6 @@ const Index = () => {
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
           <div className="md:col-span-2 space-y-6">
             <ExpenseForm onAddExpense={handleAddExpense} />
-            <ExpenseCharts expenses={expenses} />
             <ExpenseSummary expenses={expenses} />
             <ExpenseChat />
             <div className="bg-white p-4 rounded-lg shadow-sm">
