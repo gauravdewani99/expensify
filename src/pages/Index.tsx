@@ -4,7 +4,7 @@ import { ExpenseList } from "@/components/ExpenseList";
 import { ExpenseSummary } from "@/components/ExpenseSummary";
 import { ExpenseChat } from "@/components/ExpenseChat";
 import { Button } from "@/components/ui/button";
-import { Download, Eye } from "lucide-react";
+import { Download, Eye, LogOut } from "lucide-react";
 import { useToast } from "@/components/ui/use-toast";
 import {
   Dialog,
@@ -134,6 +134,17 @@ const Index = () => {
     window.URL.revokeObjectURL(url);
   };
 
+  const handleSignOut = async () => {
+    const { error } = await supabase.auth.signOut();
+    if (error) {
+      toast({
+        title: "Error",
+        description: "Failed to sign out",
+        variant: "destructive",
+      });
+    }
+  };
+
   return (
     <div className="min-h-screen bg-gray-50">
       <div className="container py-8">
@@ -155,6 +166,14 @@ const Index = () => {
             >
               <Download className="h-4 w-4" />
               Download CSV
+            </Button>
+            <Button
+              onClick={handleSignOut}
+              variant="outline"
+              className="flex items-center gap-2"
+            >
+              <LogOut className="h-4 w-4" />
+              Sign Out
             </Button>
           </div>
         </div>
