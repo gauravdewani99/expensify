@@ -3,9 +3,9 @@
 import { createClient } from '@supabase/supabase-js';
 import type { Database } from './types';
 
-// Replace these values with your new Supabase project credentials
-const SUPABASE_URL = "YOUR_NEW_PROJECT_URL"; // Replace with your new project URL 
-const SUPABASE_PUBLISHABLE_KEY = "YOUR_NEW_ANON_KEY"; // Replace with your new anon key
+// Supabase project credentials
+const SUPABASE_URL = "https://pbpjnzaszdqthwpqyrbp.supabase.co";
+const SUPABASE_PUBLISHABLE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InBicGpuemFzemRxdGh3cHF5cmJwIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Mzc4OTQ1NTUsImV4cCI6MjA1MzQ3MDU1NX0.SdQdDf9AlVjpL7zXVD6dBY_3vlqr_m4UemvWIUeiTjU";
 
 // Import the supabase client like this:
 // import { supabase } from "@/integrations/supabase/client";
