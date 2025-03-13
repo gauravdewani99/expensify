@@ -11,6 +11,7 @@ import {
 } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { useToast } from "@/components/ui/use-toast";
+import { usePrivacy } from "@/contexts/PrivacyContext";
 
 interface Expense {
   amount: number;
@@ -19,10 +20,10 @@ interface Expense {
 }
 
 export function ExpenseSummary({ expenses }: { expenses: Expense[] }) {
-  const [amountsBlurred, setAmountsBlurred] = useState(true);
   const [pinDialogOpen, setPinDialogOpen] = useState(false);
   const [pin, setPin] = useState("");
   const { toast } = useToast();
+  const { amountsBlurred, toggleAmountsVisibility, verifyPin } = usePrivacy();
   
   const totalExpenses = expenses.reduce((sum, expense) => sum + expense.amount, 0);
 
@@ -58,9 +59,20 @@ export function ExpenseSummary({ expenses }: { expenses: Expense[] }) {
     }, {} as Record<string, number>);
   };
 
+  const handleToggleVisibility = () => {
+    if (amountsBlurred) {
+      setPinDialogOpen(true);
+    } else {
+      toggleAmountsVisibility();
+      toast({
+        description: "Amounts are now hidden",
+      });
+    }
+  };
+
   const handleVerifyPin = () => {
-    if (pin === "6930") {
-      setAmountsBlurred(false);
+    const isValid = verifyPin(pin);
+    if (isValid) {
       setPinDialogOpen(false);
       setPin("");
       toast({
@@ -75,21 +87,6 @@ export function ExpenseSummary({ expenses }: { expenses: Expense[] }) {
       });
       setPin("");
     }
-  };
-
-  const toggleAmountsVisibility = () => {
-    if (amountsBlurred) {
-      setPinDialogOpen(true);
-    } else {
-      setAmountsBlurred(true);
-      toast({
-        description: "Amounts are now hidden",
-      });
-    }
-  };
-
-  const formatAmount = (amount: number) => {
-    return amountsBlurred ? "€•••••" : `€${amount.toFixed(2)}`;
   };
 
   const renderExpenseList = (data: Record<string, number>) => {
@@ -108,7 +105,7 @@ export function ExpenseSummary({ expenses }: { expenses: Expense[] }) {
       <div className="flex justify-between items-center mb-4">
         <h2 className="text-xl font-semibold">Summary</h2>
         <Button
-          onClick={toggleAmountsVisibility}
+          onClick={handleToggleVisibility}
           variant="outline"
           size="icon"
           className="flex items-center justify-center"

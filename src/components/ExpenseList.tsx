@@ -1,7 +1,9 @@
+
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Trash2 } from "lucide-react";
 import { formatDistanceToNow } from "date-fns";
+import { usePrivacy } from "@/contexts/PrivacyContext";
 
 interface Expense {
   id: number;
@@ -18,6 +20,12 @@ export function ExpenseList({
   expenses: Expense[];
   onDeleteExpense?: (id: number) => void;
 }) {
+  const { amountsBlurred } = usePrivacy();
+  
+  const shouldBlurAmount = (amount: number) => {
+    return amountsBlurred && amount > 50;
+  };
+
   return (
     <div className="space-y-4">
       {expenses.map((expense) => (
@@ -33,7 +41,9 @@ export function ExpenseList({
               </p>
             </div>
             <div className="flex items-center gap-2">
-              <p className="font-semibold">€{expense.amount.toFixed(2)}</p>
+              <p className={`font-semibold ${shouldBlurAmount(expense.amount) ? "blur-sm select-none" : ""}`}>
+                €{expense.amount.toFixed(2)}
+              </p>
               {onDeleteExpense && (
                 <Button
                   variant="ghost"
