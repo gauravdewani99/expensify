@@ -26,8 +26,8 @@ export default {
         background: "hsl(var(--background))",
         foreground: "hsl(var(--foreground))",
         primary: {
-          DEFAULT: "#81D8D0", // Pastel teal color
-          foreground: "#ffffff",
+          DEFAULT: "#D3E4FD", // Pastel light blue color
+          foreground: "#1A1F2C",
         },
         secondary: {
           DEFAULT: "#8E9196",

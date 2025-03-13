@@ -1,3 +1,4 @@
+
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -82,15 +83,12 @@ export function ExpenseForm({ onAddExpense }: { onAddExpense: (expense: any) => 
     };
 
     onAddExpense(expense);
+    
+    // Clear form after submitting - only clear after successful verification is handled by parent
     setAmount("");
     setCategory("");
     setDescription("");
     setDateInput("");
-
-    toast({
-      title: "Success",
-      description: "Expense added successfully",
-    });
   };
 
   return (

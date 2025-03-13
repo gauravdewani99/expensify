@@ -5,7 +5,7 @@ import { ExpenseList } from "@/components/ExpenseList";
 import { ExpenseSummary } from "@/components/ExpenseSummary";
 import { ExpenseChat } from "@/components/ExpenseChat";
 import { Button } from "@/components/ui/button";
-import { Download, Euro, Eye, LogOut } from "lucide-react";
+import { Download, Euro, Eye } from "lucide-react";
 import { useToast } from "@/components/ui/use-toast";
 import {
   Dialog,
@@ -15,9 +15,14 @@ import {
 } from "@/components/ui/dialog";
 import { supabase } from "@/integrations/supabase/client";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { Input } from "@/components/ui/input";
 
 const Index = () => {
   const [showCsvPreview, setShowCsvPreview] = useState(false);
+  const [showPinDialog, setShowPinDialog] = useState(false);
+  const [pin, setPin] = useState("");
+  const [currentAction, setCurrentAction] = useState<string | null>(null);
+  const [expenseToDelete, setExpenseToDelete] = useState<number | null>(null);
   const { toast } = useToast();
   const queryClient = useQueryClient();
 
@@ -100,11 +105,16 @@ const Index = () => {
   });
 
   const handleAddExpense = (expense: any) => {
-    addExpenseMutation.mutate(expense);
+    setCurrentAction('add-expense');
+    setShowPinDialog(true);
+    // Store expense temporarily
+    sessionStorage.setItem('pending-expense', JSON.stringify(expense));
   };
 
   const handleDeleteExpense = (id: number) => {
-    deleteExpenseMutation.mutate(id);
+    setCurrentAction('delete-expense');
+    setExpenseToDelete(id);
+    setShowPinDialog(true);
   };
 
   const generateCsvContent = () => {
@@ -123,27 +133,59 @@ const Index = () => {
   };
 
   const handleDownload = () => {
-    const csvContent = generateCsvContent();
-    const blob = new Blob([csvContent], { type: "text/csv" });
-    const url = window.URL.createObjectURL(blob);
-    const a = document.createElement("a");
-    a.href = url;
-    a.download = `expenses-${new Date().toLocaleDateString()}.csv`;
-    document.body.appendChild(a);
-    a.click();
-    document.body.removeChild(a);
-    window.URL.revokeObjectURL(url);
+    setCurrentAction('download-csv');
+    setShowPinDialog(true);
   };
 
-  const handleSignOut = async () => {
-    const { error } = await supabase.auth.signOut();
-    if (error) {
+  const handlePinSubmit = () => {
+    const correctPin = "6930";
+    
+    if (pin === correctPin) {
+      // Execute the appropriate action based on currentAction
+      if (currentAction === 'preview-csv') {
+        setShowCsvPreview(true);
+      } else if (currentAction === 'download-csv') {
+        const csvContent = generateCsvContent();
+        const blob = new Blob([csvContent], { type: "text/csv" });
+        const url = window.URL.createObjectURL(blob);
+        const a = document.createElement("a");
+        a.href = url;
+        a.download = `expenses-${new Date().toLocaleDateString()}.csv`;
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        window.URL.revokeObjectURL(url);
+      } else if (currentAction === 'add-expense') {
+        const pendingExpense = JSON.parse(sessionStorage.getItem('pending-expense') || '{}');
+        addExpenseMutation.mutate(pendingExpense);
+        sessionStorage.removeItem('pending-expense');
+      } else if (currentAction === 'delete-expense' && expenseToDelete !== null) {
+        deleteExpenseMutation.mutate(expenseToDelete);
+        setExpenseToDelete(null);
+      }
+      
+      // Reset state
+      setShowPinDialog(false);
+      setPin("");
+      setCurrentAction(null);
+      
+      toast({
+        title: "Success",
+        description: "PIN verified successfully",
+      });
+    } else {
       toast({
         title: "Error",
-        description: "Failed to sign out",
+        description: "Incorrect PIN. Please try again.",
         variant: "destructive",
       });
+      setPin("");
     }
+  };
+
+  const handleShowCsvPreview = () => {
+    setCurrentAction('preview-csv');
+    setShowPinDialog(true);
   };
 
   return (
@@ -157,7 +199,7 @@ const Index = () => {
             </div>
             <div className="flex gap-2">
               <Button
-                onClick={() => setShowCsvPreview(true)}
+                onClick={handleShowCsvPreview}
                 variant="outline"
                 className="flex items-center gap-2"
               >
@@ -171,14 +213,6 @@ const Index = () => {
               >
                 <Download className="h-4 w-4" />
                 Download CSV
-              </Button>
-              <Button
-                onClick={handleSignOut}
-                variant="outline"
-                className="flex items-center gap-2"
-              >
-                <LogOut className="h-4 w-4" />
-                Sign Out
               </Button>
             </div>
           </div>
@@ -214,6 +248,7 @@ const Index = () => {
         </div>
       </div>
 
+      {/* CSV Preview Dialog */}
       <Dialog open={showCsvPreview} onOpenChange={setShowCsvPreview}>
         <DialogContent className="max-w-3xl">
           <DialogHeader>
@@ -223,6 +258,39 @@ const Index = () => {
             <pre className="whitespace-pre-wrap bg-gray-50 p-4 rounded-lg text-sm">
               {generateCsvContent()}
             </pre>
+          </div>
+        </DialogContent>
+      </Dialog>
+
+      {/* PIN Verification Dialog */}
+      <Dialog open={showPinDialog} onOpenChange={setShowPinDialog}>
+        <DialogContent className="max-w-md">
+          <DialogHeader>
+            <DialogTitle>Enter PIN</DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4">
+            <p className="text-sm text-gray-600">
+              Please enter your 4-digit PIN to continue.
+            </p>
+            <Input
+              type="password"
+              placeholder="Enter PIN"
+              value={pin}
+              onChange={(e) => setPin(e.target.value)}
+              className="text-center text-xl tracking-widest"
+              maxLength={4}
+              onKeyDown={(e) => {
+                if (e.key === 'Enter') {
+                  handlePinSubmit();
+                }
+              }}
+            />
+            <Button 
+              onClick={handlePinSubmit} 
+              className="w-full"
+            >
+              Verify
+            </Button>
           </div>
         </DialogContent>
       </Dialog>
