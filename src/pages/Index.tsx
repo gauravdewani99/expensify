@@ -1,10 +1,11 @@
+
 import { useState } from "react";
 import { ExpenseForm } from "@/components/ExpenseForm";
 import { ExpenseList } from "@/components/ExpenseList";
 import { ExpenseSummary } from "@/components/ExpenseSummary";
 import { ExpenseChat } from "@/components/ExpenseChat";
 import { Button } from "@/components/ui/button";
-import { Download, Eye, LogOut } from "lucide-react";
+import { Download, Euro, Eye, LogOut } from "lucide-react";
 import { useToast } from "@/components/ui/use-toast";
 import {
   Dialog,
@@ -148,40 +149,45 @@ const Index = () => {
   return (
     <div className="min-h-screen bg-gray-50">
       <div className="container py-8">
-        <div className="flex justify-between items-center mb-8">
-          <h1 className="text-3xl font-bold">Gaurav's Expense Tracker</h1>
-          <div className="flex gap-2">
-            <Button
-              onClick={() => setShowCsvPreview(true)}
-              variant="outline"
-              className="flex items-center gap-2"
-            >
-              <Eye className="h-4 w-4" />
-              Preview CSV
-            </Button>
-            <Button
-              onClick={handleDownload}
-              variant="outline"
-              className="flex items-center gap-2"
-            >
-              <Download className="h-4 w-4" />
-              Download CSV
-            </Button>
-            <Button
-              onClick={handleSignOut}
-              variant="outline"
-              className="flex items-center gap-2"
-            >
-              <LogOut className="h-4 w-4" />
-              Sign Out
-            </Button>
+        <div className="flex flex-col mb-8">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-2">
+              <h1 className="text-3xl font-bold">Expensify</h1>
+              <Euro className="text-primary h-8 w-8" />
+            </div>
+            <div className="flex gap-2">
+              <Button
+                onClick={() => setShowCsvPreview(true)}
+                variant="outline"
+                className="flex items-center gap-2"
+              >
+                <Eye className="h-4 w-4" />
+                Preview CSV
+              </Button>
+              <Button
+                onClick={handleDownload}
+                variant="outline"
+                className="flex items-center gap-2"
+              >
+                <Download className="h-4 w-4" />
+                Download CSV
+              </Button>
+              <Button
+                onClick={handleSignOut}
+                variant="outline"
+                className="flex items-center gap-2"
+              >
+                <LogOut className="h-4 w-4" />
+                Sign Out
+              </Button>
+            </div>
           </div>
+          <p className="text-gray-600 text-lg">Gaurav's Expense Tracker</p>
         </div>
+        
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
           <div className="md:col-span-2 space-y-6">
             <ExpenseForm onAddExpense={handleAddExpense} />
-            <ExpenseSummary expenses={expenses} />
-            <ExpenseChat />
             <div className="bg-white p-4 rounded-lg shadow-sm">
               <div className="flex justify-between items-center mb-4">
                 <h2 className="text-lg font-semibold">Last 3 Expenses</h2>
