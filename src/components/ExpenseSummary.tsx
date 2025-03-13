@@ -110,17 +110,14 @@ export function ExpenseSummary({ expenses }: { expenses: Expense[] }) {
         <Button
           onClick={toggleAmountsVisibility}
           variant="outline"
-          size="sm"
-          className="flex items-center gap-1"
+          size="icon"
+          className="flex items-center justify-center"
+          aria-label={amountsBlurred ? "Show amounts" : "Hide amounts"}
         >
           {amountsBlurred ? (
-            <>
-              <Eye className="h-4 w-4" /> View Amounts
-            </>
+            <Eye className="h-4 w-4" />
           ) : (
-            <>
-              <EyeOff className="h-4 w-4" /> Hide Amounts
-            </>
+            <EyeOff className="h-4 w-4" />
           )}
         </Button>
       </div>
