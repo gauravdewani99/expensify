@@ -26,6 +26,15 @@ export function ExpenseList({
     return amountsBlurred && amount > 50;
   };
 
+  const shouldBlurDescription = (description?: string) => {
+    if (!description || !amountsBlurred) return false;
+    
+    const lowerDesc = description.toLowerCase();
+    return lowerDesc.includes("coffee") || 
+           lowerDesc.includes("shop") || 
+           lowerDesc.includes("dessert");
+  };
+
   return (
     <div className="space-y-4">
       {expenses.map((expense) => (
@@ -34,7 +43,9 @@ export function ExpenseList({
             <div>
               <h3 className="font-medium">{expense.category}</h3>
               {expense.description && (
-                <p className="text-sm text-gray-500">{expense.description}</p>
+                <p className={`text-sm text-gray-500 ${shouldBlurDescription(expense.description) ? "blur-sm select-none" : ""}`}>
+                  {expense.description}
+                </p>
               )}
               <p className="text-xs text-gray-400">
                 {formatDistanceToNow(new Date(expense.date), { addSuffix: true })}
