@@ -1,5 +1,16 @@
+import { useState } from "react";
 import { Card } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Button } from "@/components/ui/button";
+import { Eye, EyeOff } from "lucide-react";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
+import { Input } from "@/components/ui/input";
+import { useToast } from "@/components/ui/use-toast";
 
 interface Expense {
   amount: number;
@@ -8,6 +19,11 @@ interface Expense {
 }
 
 export function ExpenseSummary({ expenses }: { expenses: Expense[] }) {
+  const [amountsBlurred, setAmountsBlurred] = useState(true);
+  const [pinDialogOpen, setPinDialogOpen] = useState(false);
+  const [pin, setPin] = useState("");
+  const { toast } = useToast();
+  
   const totalExpenses = expenses.reduce((sum, expense) => sum + expense.amount, 0);
 
   const getMonthlyExpenses = () => {
@@ -42,22 +58,78 @@ export function ExpenseSummary({ expenses }: { expenses: Expense[] }) {
     }, {} as Record<string, number>);
   };
 
+  const handleVerifyPin = () => {
+    if (pin === "6930") {
+      setAmountsBlurred(false);
+      setPinDialogOpen(false);
+      setPin("");
+      toast({
+        title: "Success",
+        description: "Amounts are now visible",
+      });
+    } else {
+      toast({
+        title: "Error",
+        description: "Incorrect PIN",
+        variant: "destructive",
+      });
+      setPin("");
+    }
+  };
+
+  const toggleAmountsVisibility = () => {
+    if (amountsBlurred) {
+      setPinDialogOpen(true);
+    } else {
+      setAmountsBlurred(true);
+      toast({
+        description: "Amounts are now hidden",
+      });
+    }
+  };
+
+  const formatAmount = (amount: number) => {
+    return amountsBlurred ? "€•••••" : `€${amount.toFixed(2)}`;
+  };
+
   const renderExpenseList = (data: Record<string, number>) => {
     return Object.entries(data).map(([key, amount]) => (
       <div key={key} className="flex justify-between items-center">
         <span className="text-sm text-gray-600">{key}</span>
-        <span className="text-sm">€{amount.toFixed(2)}</span>
+        <span className={`text-sm ${amountsBlurred ? "blur-sm select-none" : ""}`}>
+          €{amount.toFixed(2)}
+        </span>
       </div>
     ));
   };
 
   return (
     <Card className="p-4">
-      <h2 className="text-xl font-semibold mb-4">Summary</h2>
+      <div className="flex justify-between items-center mb-4">
+        <h2 className="text-xl font-semibold">Summary</h2>
+        <Button
+          onClick={toggleAmountsVisibility}
+          variant="outline"
+          size="sm"
+          className="flex items-center gap-1"
+        >
+          {amountsBlurred ? (
+            <>
+              <Eye className="h-4 w-4" /> View Amounts
+            </>
+          ) : (
+            <>
+              <EyeOff className="h-4 w-4" /> Hide Amounts
+            </>
+          )}
+        </Button>
+      </div>
       <div className="space-y-2">
         <div className="flex justify-between items-center">
           <span className="text-gray-600">Total Expenses</span>
-          <span className="font-bold text-primary">€{totalExpenses.toFixed(2)}</span>
+          <span className={`font-bold text-primary ${amountsBlurred ? "blur-sm select-none" : ""}`}>
+            €{totalExpenses.toFixed(2)}
+          </span>
         </div>
         <div className="h-px bg-gray-200 my-4" />
         
@@ -86,6 +158,30 @@ export function ExpenseSummary({ expenses }: { expenses: Expense[] }) {
           </TabsContent>
         </Tabs>
       </div>
+
+      <Dialog open={pinDialogOpen} onOpenChange={setPinDialogOpen}>
+        <DialogContent className="sm:max-w-md">
+          <DialogHeader>
+            <DialogTitle>Enter PIN to View Amounts</DialogTitle>
+          </DialogHeader>
+          <div className="flex flex-col gap-4 py-4">
+            <Input
+              type="password"
+              placeholder="Enter PIN"
+              value={pin}
+              onChange={(e) => setPin(e.target.value)}
+              maxLength={4}
+              className="text-center text-xl tracking-widest"
+              onKeyDown={(e) => {
+                if (e.key === "Enter") {
+                  handleVerifyPin();
+                }
+              }}
+            />
+            <Button onClick={handleVerifyPin}>Verify</Button>
+          </div>
+        </DialogContent>
+      </Dialog>
     </Card>
   );
 }
