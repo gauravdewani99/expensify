@@ -5,16 +5,19 @@ interface PrivacyContextType {
   amountsBlurred: boolean;
   toggleAmountsVisibility: () => void;
   verifyPin: (enteredPin: string) => boolean;
+  isAuthenticated: boolean;
 }
 
 const PrivacyContext = createContext<PrivacyContextType | undefined>(undefined);
 
 export function PrivacyProvider({ children }: { children: ReactNode }) {
   const [amountsBlurred, setAmountsBlurred] = useState(true);
+  const [isAuthenticated, setIsAuthenticated] = useState(false);
 
   const toggleAmountsVisibility = () => {
     if (!amountsBlurred) {
       setAmountsBlurred(true);
+      setIsAuthenticated(false); // Reset authentication when hiding amounts
     } else {
       // When trying to unblur, we'll handle this in the consumer components
       // by showing a PIN dialog
@@ -27,13 +30,14 @@ export function PrivacyProvider({ children }: { children: ReactNode }) {
     
     if (isValid) {
       setAmountsBlurred(false);
+      setIsAuthenticated(true); // Mark as authenticated when PIN is correct
     }
     
     return isValid;
   };
 
   return (
-    <PrivacyContext.Provider value={{ amountsBlurred, toggleAmountsVisibility, verifyPin }}>
+    <PrivacyContext.Provider value={{ amountsBlurred, toggleAmountsVisibility, verifyPin, isAuthenticated }}>
       {children}
     </PrivacyContext.Provider>
   );

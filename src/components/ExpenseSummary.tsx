@@ -1,3 +1,4 @@
+
 import { useState } from "react";
 import { Card } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -23,7 +24,7 @@ export function ExpenseSummary({ expenses }: { expenses: Expense[] }) {
   const [pinDialogOpen, setPinDialogOpen] = useState(false);
   const [pin, setPin] = useState("");
   const { toast } = useToast();
-  const { amountsBlurred, toggleAmountsVisibility, verifyPin } = usePrivacy();
+  const { amountsBlurred, toggleAmountsVisibility, verifyPin, isAuthenticated } = usePrivacy();
   
   const totalExpenses = expenses.reduce((sum, expense) => sum + expense.amount, 0);
 

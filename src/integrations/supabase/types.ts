@@ -36,6 +36,30 @@ export type Database = {
         }
         Relationships: []
       }
+      spotify_credentials: {
+        Row: {
+          client_id: string
+          client_secret: string
+          created_at: string | null
+          id: string
+          updated_at: string | null
+        }
+        Insert: {
+          client_id: string
+          client_secret: string
+          created_at?: string | null
+          id?: string
+          updated_at?: string | null
+        }
+        Update: {
+          client_id?: string
+          client_secret?: string
+          created_at?: string | null
+          id?: string
+          updated_at?: string | null
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
