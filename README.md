@@ -1,8 +1,10 @@
-# Welcome to your Lovable project
+# Welcome to Expensify
 
 ## Project info
 
-**URL**: https://lovable.dev/projects/39b8169e-2bb0-4bea-a7af-fccdae90679a
+Expensify is a tool to help me log my expenses along with an AI chatbot. Simply ask: "how much did I spend on Uber last month?"
+
+**URL**: https://daily-spend-snoop.lovable.app/
 
 ## How can I edit this code?
 
